@@ -1,36 +1,48 @@
 import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
 import { createPinia } from 'pinia'
-
-// naive-ui
 import {
   create,
   NButton,
+  NCard,
   NForm,
   NFormItem,
   NInput,
-  NCard,
   NSpace,
   NLayout,
   NLayoutHeader,
   NLayoutContent,
-  NLayoutFooter,
+  NLayoutSider,
+  NMenu,
+  NDropdown,
+  NAvatar,
+  NIcon,
+  NStatistic,
+  NNumberAnimation,
   NMessageProvider
 } from 'naive-ui'
 
+import App from './App.vue'
+import router from './router'
+
+// 创建 Naive UI 实例
 const naive = create({
   components: [
     NButton,
+    NCard,
     NForm,
     NFormItem,
     NInput,
-    NCard,
     NSpace,
     NLayout,
     NLayoutHeader,
     NLayoutContent,
-    NLayoutFooter,
+    NLayoutSider,
+    NMenu,
+    NDropdown,
+    NAvatar,
+    NIcon,
+    NStatistic,
+    NNumberAnimation,
     NMessageProvider
   ]
 })
@@ -38,6 +50,7 @@ const naive = create({
 const app = createApp(App)
 const pinia = createPinia()
 
+// 注册插件
 app.use(router)
 app.use(pinia)
 app.use(naive)
