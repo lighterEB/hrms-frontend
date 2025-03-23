@@ -1,5 +1,5 @@
 <template>
-    <n-card title="欢迎使用 HRMS 系统">
+    <n-card title="欢迎使用 人力资源管理系统">
       <n-space vertical>
         <n-statistic label="在职员工">
           <n-number-animation

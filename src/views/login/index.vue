@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <n-card :title="isLogin ? '企业人事管理系统登录' : '账号注册'" class="login-card">
+    <n-card :title="isLogin ? '人力资源管理系统登录' : '账号注册'" class="login-card">
       <!-- 登录表单 -->
       <n-form v-if="isLogin" ref="loginFormRef" :model="loginForm" :rules="loginRules">
         <n-form-item path="username" label="用户名">
@@ -27,6 +27,13 @@
         <n-form-item path="password" label="密码">
           <n-input v-model:value="registerForm.password" type="password" placeholder="密码必须包含大小写字母和数字，长度6-20位" />
         </n-form-item>
+        <n-form-item path="confirmPassword" label="确认密码">
+      <n-input
+        v-model:value="registerForm.confirmPassword"
+        type="password"
+        placeholder="请再次输入密码"
+      />
+    </n-form-item>
         <n-form-item path="realName" label="真实姓名">
           <n-input v-model:value="registerForm.realName" placeholder="请输入真实姓名" />
         </n-form-item>
@@ -51,11 +58,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useMessage } from 'naive-ui'
 import type { FormInst, FormRules } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import type { RegisterRequest } from '@/types/auth'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
 
 const router = useRouter()
 const message = useMessage()
@@ -72,10 +81,15 @@ const loginForm = ref({
   password: ''
 })
 
+interface RegisterFormData extends RegisterRequest {
+  confirmPassword: string
+}
+
 // 注册表单数据
-const registerForm = ref<RegisterRequest>({
+const registerForm = ref<RegisterFormData>({
   username: '',
   password: '',
+  confirmPassword: '',
   realName: '',
   phone: '',
   email: ''
@@ -102,6 +116,15 @@ const registerRules: FormRules = {
       pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,20}$/,
       message: '密码必须包含大小写字母和数字，长度6-20位',
       trigger: 'blur'
+    }
+  ],
+  confirmPassword: [
+    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    {
+      validator: (_rule, value) => {
+        return value === registerForm.value.password || new Error('两次输入的密码不一致')
+      },
+      trigger: ['blur', 'input']
     }
   ],
   realName: [
@@ -138,7 +161,9 @@ const handleLogin = () => {
       loading.value = true
       await userStore.loginAction(loginForm.value.username, loginForm.value.password)
       message.success('登录成功')
-      router.push('/')
+      // 获取重定向地址
+      const redirect = route.query.redirect as string
+      router.push(redirect || '/')
     } catch (error) {
       console.error('登录失败:', error)
     } finally {
@@ -153,11 +178,13 @@ const handleRegister = () => {
     if (errors) return
 
     try {
-      await userStore.registerAction(registerForm.value)
+      const { confirmPassword, ...registerData } = registerForm.value
+      await userStore.registerAction(registerData)
       // 重置表单
       registerForm.value = {
         username: '',
         password: '',
+        confirmPassword: '',
         realName: '',
         phone: '',
         email: ''

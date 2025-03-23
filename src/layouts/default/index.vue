@@ -113,11 +113,11 @@ import { renderIcon } from '@/utils/icons'
   ]
   
   // 处理用户菜单选择
-  const handleUserSelect = (key: string) => {
+  const handleUserSelect = async (key: string) => {
     switch (key) {
       case 'logout':
-        userStore.logout()
-        router.push('/login')
+        await userStore.logout()
+        await router.push('/login')
         break
       case 'password':
         router.push('/password')

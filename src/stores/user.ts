@@ -30,20 +30,20 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-    // 注册
-    async function registerAction(registerData: RegisterRequest) {
-        try {
-          isRegistering.value = true
-          await register(registerData)
-          message.success('注册成功')
-          return true
-        } catch (error) {
-          message.error('注册失败')
-          return Promise.reject(error)
-        } finally {
-          isRegistering.value = false
-        }
-      }
+  // 注册
+  async function registerAction(registerData: RegisterRequest) {
+    try {
+      isRegistering.value = true
+      await register(registerData)
+      message.success('注册成功')
+      return true
+    } catch (error) {
+      message.error('注册失败')
+      return Promise.reject(error)
+    } finally {
+      isRegistering.value = false
+    }
+  }
 
   // 登出
   async function logout() {
