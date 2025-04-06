@@ -36,7 +36,7 @@ const router = createRouter({
 });
 
 // 路由守卫
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to, from, next) => {
   // 设置页面标题
   const title = to.meta.title
     ? `${to.meta.title} - 人力资源管理系统`
@@ -46,9 +46,10 @@ router.beforeEach(async (to, _from, next) => {
   const userStore = useUserStore()
   const token = userStore.token
 
+  // 已经登录的情况
   if (token) {
-    if (to.path === "/login" || to.path === "/register") {
-      // 已登录状态下访问登录页或注册页，重定向到首页
+    if (to.path === "/login") {
+      // 已登录状态下访问登录页，重定向到首页
       next({ path: "/" })
     } else {
       // 如果没有用户信息，先获取用户信息
@@ -66,15 +67,36 @@ router.beforeEach(async (to, _from, next) => {
         next()
       }
     }
-  } else {
-    // 白名单路由直接放行
-    if (WHITE_LIST.includes(to.path)) {
-      next()
-    } else {
-      message.warning("请先登录")
+    return
+  }
+
+  // 未登录但有记住我的情况，尝试自动登录
+  if (!token && userStore.rememberMe && to.path !== '/login' && !WHITE_LIST.includes(to.path)) {
+    try {
+      await userStore.autoLogin()
+      // 自动登录成功，继续访问目标页面
+      if (to.path === '/login') {
+        next('/')
+      } else {
+        next()
+      }
+      return
+    } catch (error) {
+      // 自动登录失败，重定向到登录页
       next(`/login?redirect=${to.path}`)
+      return
     }
   }
+
+  // 白名单路由直接放行
+  if (WHITE_LIST.includes(to.path)) {
+    next()
+    return
+  }
+  
+  // 其他未登录情况，重定向到登录页
+  message.warning("请先登录")
+  next(`/login?redirect=${to.path}`)
 });
 
 // 路由错误处理

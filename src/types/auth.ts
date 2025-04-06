@@ -13,7 +13,14 @@ export interface RegisterRequest {
   email?: string;
 }
 
-// 登录响应
+// 修改密码请求参数
+export interface UpdatePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+// 登录响应数据
 export interface LoginResponse {
   token: string;
   tokenType: string;
@@ -33,16 +40,31 @@ export interface UserInfoResponse {
   permissions: string[];
 }
 
-// 通用响应格式
-export interface ApiResponse<T> {
-  code: number;
-  msg: string;
-  data: T;
+// 系统用户信息
+export interface SysUser {
+  id: number;
+  createTime: string;
+  createUser: string;
+  updateTime: string;
+  updateUser: string;
+  isDeleted: number;
+  username: string;
+  password: string;
+  realName: string;
+  phone: string;
+  email: string;
+  avatar: string;
+  gender: number;
+  status: number;
+  lastLoginTime: string;
 }
 
 // 通用响应格式
 export interface ApiResponse<T> {
   code: number;
-  msg: string;
+  message: string;
   data: T;
+  extra?: any;
+  success: boolean;
+  timestamp: number;
 }

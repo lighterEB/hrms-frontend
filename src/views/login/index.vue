@@ -9,9 +9,13 @@
         <n-form-item path="password" label="密码">
           <n-input v-model:value="loginForm.password" type="password" placeholder="请输入密码" @keyup.enter="handleLogin" />
         </n-form-item>
+        <n-space justify="space-between" style="margin-bottom: 16px">
+          <n-checkbox v-model:checked="rememberMe">记住我</n-checkbox>
+          <n-button text size="small">忘记密码？</n-button>
+        </n-space>
         <n-space justify="center" :wrap="true">
-          <n-button type="primary" :loading="loading" @click="handleLogin">
-            {{ loading ? '登录中...' : '登录' }}
+          <n-button type="primary" :loading="userStore.loading" @click="handleLogin">
+            {{ userStore.loading ? '登录中...' : '登录' }}
           </n-button>
           <n-button @click="switchForm(false)">
             注册账号
@@ -28,12 +32,12 @@
           <n-input v-model:value="registerForm.password" type="password" placeholder="密码必须包含大小写字母和数字，长度6-20位" />
         </n-form-item>
         <n-form-item path="confirmPassword" label="确认密码">
-      <n-input
-        v-model:value="registerForm.confirmPassword"
-        type="password"
-        placeholder="请再次输入密码"
-      />
-    </n-form-item>
+          <n-input
+            v-model:value="registerForm.confirmPassword"
+            type="password"
+            placeholder="请再次输入密码"
+          />
+        </n-form-item>
         <n-form-item path="realName" label="真实姓名">
           <n-input v-model:value="registerForm.realName" placeholder="请输入真实姓名" />
         </n-form-item>
@@ -57,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useMessage } from 'naive-ui'
 import type { FormInst, FormRules } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
@@ -65,20 +69,26 @@ import type { RegisterRequest } from '@/types/auth'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
-
 const router = useRouter()
 const message = useMessage()
 const userStore = useUserStore()
 
 const isLogin = ref(true)
-const loading = ref(false)
 const loginFormRef = ref<FormInst | null>(null)
 const registerFormRef = ref<FormInst | null>(null)
 
 // 登录表单数据
 const loginForm = ref({
-  username: '',
-  password: ''
+  username: userStore.savedUsername,
+  password: userStore.savedPassword
+})
+
+// 记住我
+const rememberMe = ref(userStore.rememberMe)
+
+// 监听记住我状态变化
+watch(rememberMe, (value) => {
+  userStore.setRememberMe(value)
 })
 
 interface RegisterFormData extends RegisterRequest {
@@ -158,16 +168,27 @@ const handleLogin = () => {
     if (errors) return
 
     try {
-      loading.value = true
-      await userStore.loginAction(loginForm.value.username, loginForm.value.password)
+      console.log('开始登录...')
+      const result = await userStore.loginAction({
+        username: loginForm.value.username,
+        password: loginForm.value.password
+      })
+      
+      console.log('登录成功, 返回结果:', result)
       message.success('登录成功')
+      
       // 获取重定向地址
       const redirect = route.query.redirect as string
-      router.push(redirect || '/')
-    } catch (error) {
+      console.log('即将跳转到:', redirect || '/')
+      
+      // 确保异步操作完成后再跳转
+      setTimeout(() => {
+        router.push(redirect || '/')
+      }, 100)
+    } catch (error: any) {
+      // 显示具体的错误信息
       console.error('登录失败:', error)
-    } finally {
-      loading.value = false
+      message.error(error.message || '登录失败，请检查用户名和密码')
     }
   })
 }
@@ -180,6 +201,7 @@ const handleRegister = () => {
     try {
       const { confirmPassword, ...registerData } = registerForm.value
       await userStore.registerAction(registerData)
+      message.success('注册成功，请登录')
       // 重置表单
       registerForm.value = {
         username: '',
@@ -191,8 +213,8 @@ const handleRegister = () => {
       }
       // 切换到登录表单
       switchForm(true)
-    } catch (error) {
-      console.error('注册失败:', error)
+    } catch (error: any) {
+      message.error(error.message || '注册失败，请稍后重试')
     }
   })
 }
@@ -200,18 +222,16 @@ const handleRegister = () => {
 
 <style scoped>
 .login-container {
-  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f5f7f9;
+  min-height: 100vh;
+  background-color: #f5f7fa;
 }
 
 .login-card {
-  width: 360px;
-}
-
-.login-card :deep(.n-card-header) {
-  text-align: center;
+  width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 </style>
