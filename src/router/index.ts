@@ -2,9 +2,11 @@ import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 import { WHITE_LIST } from "./constants";
 import { useUserStore } from "@/stores/user";
+import { useMenuStore } from "@/stores/menu";
 import message from "@/utils/message";
 
-const routes: RouteRecordRaw[] = [
+// 静态路由
+export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/login",
     name: "Login",
@@ -32,8 +34,11 @@ const routes: RouteRecordRaw[] = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes: constantRoutes,
 });
+
+// 是否已经加载过动态路由
+let hasLoadedRoutes = false;
 
 // 路由守卫
 router.beforeEach(async (to, from, next) => {
@@ -44,28 +49,58 @@ router.beforeEach(async (to, from, next) => {
   document.title = title
 
   const userStore = useUserStore()
+  const menuStore = useMenuStore()
   const token = userStore.token
+  
+  console.log('路由守卫 - 当前路由:', to.path, '是否有token:', !!token);
 
   // 已经登录的情况
   if (token) {
     if (to.path === "/login") {
       // 已登录状态下访问登录页，重定向到首页
+      console.log('已登录，重定向到首页');
       next({ path: "/" })
     } else {
-      // 如果没有用户信息，先获取用户信息
-      if (!userStore.userInfo) {
+      // 如果还没有加载过动态路由，先获取用户信息和菜单
+      if (!hasLoadedRoutes) {
         try {
-          await userStore.getInfo()
-          next()
+          console.log('准备加载动态路由...');
+          // 先获取用户信息
+          if (!userStore.userInfo) {
+            console.log('获取用户信息...');
+            await userStore.getInfo()
+          }
+          
+          // 加载菜单并生成路由
+          console.log('获取菜单...');
+          const menus = await menuStore.getMenus()
+          console.log('获取到的菜单数据:', menus);
+          
+          console.log('添加动态路由...');
+          await menuStore.addDynamicRoutes()
+          
+          // 标记已加载动态路由
+          hasLoadedRoutes = true
+          
+          // 重新进入当前路由，确保所有动态路由已加载
+          console.log('重新导航到:', to.path);
+          next({ ...to, replace: true })
+          return
         } catch (error) {
-          // 获取用户信息失败，可能是token过期
+          // 获取信息失败，可能是token过期
+          console.error('获取信息失败:', error);
           message.error("登录状态已过期，请重新登录")
           userStore.resetState()
+          // 重置路由加载状态
+          hasLoadedRoutes = false
           next(`/login?redirect=${to.path}`)
+          return
         }
-      } else {
-        next()
       }
+      
+      // 正常访问路由
+      console.log('正常访问路由:', to.path);
+      next()
     }
     return
   }

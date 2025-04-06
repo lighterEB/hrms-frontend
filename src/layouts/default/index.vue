@@ -18,12 +18,7 @@
         </div>
         
         <!-- 菜单 -->
-        <n-menu
-          :collapsed="collapsed"
-          :collapsed-width="64"
-          :collapsed-icon-size="22"
-          :options="menuOptions"
-        />
+        <side-menu :collapsed="collapsed" />
       </n-layout-sider>
   
       <!-- 主体区域 -->
@@ -41,13 +36,16 @@
             </n-button>
           </div>
           <div class="header-right">
-            <n-dropdown :options="userOptions" @select="handleUserSelect">
-              <n-avatar
-                round
-                size="small"
-                :src="userStore.userInfo?.avatar || ''"
-              />
-            </n-dropdown>
+            <n-space align="center">
+              <n-text>{{ userStore.userInfo?.realName || userStore.userInfo?.username }}</n-text>
+              <n-dropdown :options="userOptions" @select="handleUserSelect">
+                <n-avatar
+                  round
+                  size="small"
+                  :src="userStore.userInfo?.avatar || ''"
+                />
+              </n-dropdown>
+            </n-space>
           </div>
         </n-layout-header>
   
@@ -62,42 +60,17 @@
   <script setup lang="ts">
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
-  import { MenuFoldOutlined, MenuUnfoldOutlined, HomeOutlined, TeamOutlined } from '@vicons/antd'
+  import { MenuFoldOutlined, MenuUnfoldOutlined } from '@vicons/antd'
   import { useUserStore } from '@/stores/user'
-  import type { MenuOption } from 'naive-ui'
-import { renderIcon } from '@/utils/icons'
+  import SideMenu from '@/components/SideMenu.vue'
+  import type { DropdownOption } from 'naive-ui'
   
   const router = useRouter()
   const userStore = useUserStore()
   const collapsed = ref(false)
   
-  // 菜单配置
-  const menuOptions: MenuOption[] = [
-    {
-      label: '首页',
-      key: 'home',
-      icon: renderIcon(HomeOutlined)
-    },
-    {
-      label: '员工管理',
-      key: 'employee',
-      icon: renderIcon(TeamOutlined),
-      children: [
-        {
-          label: '员工列表',
-          key: 'employee_list'
-        },
-        {
-          label: '员工档案',
-          key: 'employee_profile'
-        }
-      ]
-    }
-    // ... 其他菜单项
-  ]
-  
   // 用户下拉菜单选项
-  const userOptions = [
+  const userOptions: DropdownOption[] = [
     {
       label: '个人信息',
       key: 'profile'
@@ -117,7 +90,6 @@ import { renderIcon } from '@/utils/icons'
     switch (key) {
       case 'logout':
         await userStore.logout()
-        await router.push('/login')
         break
       case 'password':
         router.push('/password')
