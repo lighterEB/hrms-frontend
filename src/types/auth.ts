@@ -20,6 +20,14 @@ export interface UpdatePasswordRequest {
   confirmPassword: string;
 }
 
+// 更新用户信息请求参数
+export interface UpdateUserRequest {
+  realName?: string;
+  phone?: string;
+  email?: string;
+  gender?: number;
+}
+
 // 登录响应数据
 export interface LoginResponse {
   token: string;

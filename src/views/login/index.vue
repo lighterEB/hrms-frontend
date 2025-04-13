@@ -1,31 +1,34 @@
 <template>
   <div class="login-container">
-    <n-card :title="isLogin ? '人力资源管理系统登录' : '账号注册'" class="login-card">
+    <n-card class="login-card">
+      <template #header>
+        <div class="card-title">人力资源管理系统</div>
+      </template>
       <!-- 登录表单 -->
-      <n-form v-if="isLogin" ref="loginFormRef" :model="loginForm" :rules="loginRules">
-        <n-form-item path="username" label="用户名">
+      <n-form v-if="isLogin" ref="loginFormRef" :model="loginForm" :rules="loginRules" label-placement="left" label-width="auto" require-mark-placement="right-hanging" size="large">
+        <n-form-item path="username" label="用户名" first>
           <n-input v-model:value="loginForm.username" placeholder="请输入用户名" />
         </n-form-item>
         <n-form-item path="password" label="密码">
           <n-input v-model:value="loginForm.password" type="password" placeholder="请输入密码" @keyup.enter="handleLogin" />
         </n-form-item>
-        <n-space justify="space-between" style="margin-bottom: 16px">
+        <div class="login-options">
           <n-checkbox v-model:checked="rememberMe">记住我</n-checkbox>
-          <n-button text size="small">忘记密码？</n-button>
-        </n-space>
-        <n-space justify="center" :wrap="true">
-          <n-button type="primary" :loading="userStore.loading" @click="handleLogin">
-            {{ userStore.loading ? '登录中...' : '登录' }}
+          <n-button text type="primary">忘记密码？</n-button>
+        </div>
+        <div class="form-actions">
+          <n-button type="primary" size="large" :loading="userStore.loading" @click="handleLogin">
+            登录
           </n-button>
-          <n-button @click="switchForm(false)">
+          <n-button size="large" @click="switchForm(false)">
             注册账号
           </n-button>
-        </n-space>
+        </div>
       </n-form>
 
       <!-- 注册表单 -->
-      <n-form v-else ref="registerFormRef" :model="registerForm" :rules="registerRules">
-        <n-form-item path="username" label="用户名">
+      <n-form v-else ref="registerFormRef" :model="registerForm" :rules="registerRules" label-placement="left" label-width="auto" require-mark-placement="right-hanging" size="large">
+        <n-form-item path="username" label="用户名" first>
           <n-input v-model:value="registerForm.username" placeholder="请输入用户名" />
         </n-form-item>
         <n-form-item path="password" label="密码">
@@ -47,14 +50,14 @@
         <n-form-item path="email" label="邮箱">
           <n-input v-model:value="registerForm.email" placeholder="请输入邮箱（选填）" />
         </n-form-item>
-        <n-space justify="center" :wrap="true">
-          <n-button type="primary" :loading="userStore.isRegistering" @click="handleRegister">
-            {{ userStore.isRegistering ? '注册中...' : '注册' }}
+        <div class="form-actions">
+          <n-button type="primary" size="large" :loading="userStore.isRegistering" @click="handleRegister">
+            注册
           </n-button>
-          <n-button @click="switchForm(true)">
+          <n-button size="large" @click="switchForm(true)">
             返回登录
           </n-button>
-        </n-space>
+        </div>
       </n-form>
     </n-card>
   </div>
@@ -226,12 +229,103 @@ const handleRegister = () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  width: 100%;
   background-color: #f5f7fa;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .login-card {
-  width: 400px;
+  width: 100%;
+  max-width: 500px;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: visible;
+}
+
+.card-title {
+  font-size: 24px;
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+}
+
+:deep(.n-form) {
+  margin-top: 20px;
+  position: relative;
+}
+
+:deep(.n-form-item) {
+  display: flex;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+:deep(.n-form-item-label) {
+  font-size: 14px;
+  color: #333;
+  padding-right: 12px;
+  width: 70px;
+  flex-shrink: 0;
+}
+
+:deep(.n-input) {
+  width: 280px;
+}
+
+:deep(.n-form-item-feedback-wrapper) {
+  position: absolute;
+  left: calc(80%);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:deep(.n-form-item-feedback--error) {
+  color: #f56c6c;
+  font-size: 12px;
+}
+
+.login-options {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: stretch;
+  margin: 0 0 24px 0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+:deep(.n-button) {
+  min-width: 100px;
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    max-width: 100%;
+  }
+
+  :deep(.n-input) {
+    width: 100%;
+  }
+
+  :deep(.n-form-item-feedback-wrapper) {
+    position: static;
+    margin-left: 0;
+    transform: none;
+    max-width: none;
+  }
+
+  .login-options {
+    margin-left: 0;
+  }
 }
 </style>

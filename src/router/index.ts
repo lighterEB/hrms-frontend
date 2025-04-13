@@ -28,6 +28,15 @@ export const constantRoutes: RouteRecordRaw[] = [
           title: "首页",
         },
       },
+      {
+        path: "my-profile",
+        name: "UserProfile",
+        component: () => import("@/views/user-profile/index.vue"),
+        meta: {
+          title: "个人资料",
+          requiresAuth: true
+        },
+      },
     ],
   },
 ];

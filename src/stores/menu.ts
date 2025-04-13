@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getUserMenus } from '@/api/menu'
 import type { MenuVO, RouteMenu } from '@/types/menu'
-import { useRouter } from 'vue-router'
+import router from '@/router'
 
 export const useMenuStore = defineStore('menu', () => {
   const menus = ref<MenuVO[]>([])
@@ -135,20 +135,38 @@ export const useMenuStore = defineStore('menu', () => {
   async function addDynamicRoutes() {
     try {
       console.log('开始添加动态路由');
-      const router = useRouter()
       const routes = generateRoutes()
       console.log('生成的路由配置:', JSON.stringify(routes, null, 2));
       
       // 清除旧路由
       router.getRoutes().forEach(route => {
-        if (route.name && route.name !== 'Login' && route.name !== 'Home') {
+        // 只清除非基础路由
+        if (route.name && 
+            !['Login', 'Home', 'UserProfile'].includes(route.name.toString()) && 
+            route.path !== '/' && 
+            route.path !== '/login' && 
+            route.path !== '/home' && 
+            route.path !== '/my-profile') {
           console.log('移除路由:', route.name);
           router.removeRoute(route.name)
         }
       })
       
-      // 添加新路由
+      // 添加新路由，过滤掉与静态路由冲突的路由
       routes.forEach(route => {
+        // 跳过与静态路由冲突的路由
+        if (route.path === '/home' || route.path === '/my-profile' || 
+            route.name === 'Home' || route.name === 'UserProfile') {
+          console.log('跳过静态路由:', route.name, route.path);
+          return;
+        }
+        
+        // 跳过根路径以避免冲突
+        if (route.path === '/') {
+          console.log('跳过根路径路由');
+          return;
+        }
+        
         console.log('添加路由:', route.name, route.path);
         router.addRoute(route as any)
       })

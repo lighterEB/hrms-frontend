@@ -3,56 +3,83 @@ import { createPinia } from 'pinia'
 import {
   create,
   NButton,
-  NCard,
   NForm,
   NFormItem,
   NInput,
-  NSpace,
+  NInputGroup,
+  NIcon,
   NLayout,
   NLayoutHeader,
-  NLayoutContent,
   NLayoutSider,
+  NLayoutContent,
   NMenu,
+  NSpace,
   NDropdown,
   NAvatar,
-  NIcon,
+  NCard,
+  NRadio,
+  NRadioGroup,
+  NModal,
+  NMessageProvider,
   NStatistic,
   NNumberAnimation,
-  NMessageProvider
+  NGrid,
+  NGridItem,
+  NList,
+  NListItem,
+  NThing,
+  NText,
+  NCheckbox,
+  NEmpty
 } from 'naive-ui'
 
 import App from './App.vue'
 import router from './router'
+import message from './utils/message'
 
-// 创建 Naive UI 实例
+import './style.css'
+
 const naive = create({
   components: [
     NButton,
-    NCard,
     NForm,
     NFormItem,
     NInput,
-    NSpace,
+    NInputGroup,
+    NIcon,
     NLayout,
     NLayoutHeader,
-    NLayoutContent,
     NLayoutSider,
+    NLayoutContent,
     NMenu,
+    NSpace,
     NDropdown,
     NAvatar,
-    NIcon,
+    NCard,
+    NRadio,
+    NRadioGroup,
+    NModal,
+    NMessageProvider,
     NStatistic,
     NNumberAnimation,
-    NMessageProvider
+    NGrid,
+    NGridItem,
+    NList,
+    NListItem,
+    NThing,
+    NText,
+    NCheckbox,
+    NEmpty
   ]
 })
 
 const app = createApp(App)
-const pinia = createPinia()
 
-// 注册插件
+app.use(createPinia())
 app.use(router)
-app.use(pinia)
 app.use(naive)
+
+// 挂载全局消息API
+app.config.globalProperties.$message = message
 
 app.mount('#app')
