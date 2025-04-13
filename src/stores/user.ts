@@ -4,6 +4,7 @@ import type { UserInfoResponse, RegisterRequest, LoginRequest, SysUser, UpdatePa
 import { login, getUserInfo, logout as logoutApi, register, updatePassword } from '@/api/auth'
 import message from '@/utils/message'
 import router from '@/router'
+import { useMenuStore } from './menu'
 
 // Token 存储的键名
 const TOKEN_KEY = 'token'
@@ -22,6 +23,7 @@ export const useUserStore = defineStore('user', () => {
   const isRegistering = ref(false)
   const loading = ref(false)
   const rememberMe = ref(localStorage.getItem(REMEMBER_KEY) === 'true')
+  const menuStore = useMenuStore()
 
   // 计算属性
   const isLoggedIn = computed(() => Boolean(token.value))
@@ -142,7 +144,6 @@ export const useUserStore = defineStore('user', () => {
     try {
       isRegistering.value = true
       await register(registerData)
-      message.success('注册成功')
       return true
     } catch (error: any) {
       return Promise.reject(error)
@@ -223,6 +224,8 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(TOKEN_TYPE_KEY)
     // 保留记住我的设置
+    rememberMe.value = false
+    menuStore.resetState()
   }
 
   return {

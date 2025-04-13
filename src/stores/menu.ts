@@ -7,6 +7,7 @@ import router from '@/router'
 export const useMenuStore = defineStore('menu', () => {
   const menus = ref<MenuVO[]>([])
   const loading = ref(false)
+  const hasMenus = ref(false)
 
   // 菜单树形结构
   const menuTree = computed(() => buildMenuTree(menus.value))
@@ -17,17 +18,32 @@ export const useMenuStore = defineStore('menu', () => {
       loading.value = true
       const result = await getUserMenus()
       menus.value = result
+      hasMenus.value = result.length > 0
       return result
     } catch (error) {
       console.error('获取菜单失败:', error)
+      menus.value = []
+      hasMenus.value = false
       return []
     } finally {
       loading.value = false
     }
   }
   
+  // 重置菜单状态
+  function resetState() {
+    console.log('重置菜单状态');
+    menus.value = []
+    loading.value = false
+    hasMenus.value = false
+  }
+  
   // 构建树形菜单
   function buildMenuTree(menus: MenuVO[]): MenuVO[] {
+    if (!menus || menus.length === 0) {
+      return []
+    }
+    
     console.log('构建菜单树，原始菜单数据:', menus);
     
     // 创建一个映射，用于快速查找菜单项
@@ -78,6 +94,10 @@ export const useMenuStore = defineStore('menu', () => {
   
   // 将菜单转换为路由
   function generateRoutes(tree: MenuVO[] = menuTree.value) {
+    if (!tree || tree.length === 0) {
+      return []
+    }
+    
     console.log('转换菜单为路由, 菜单数据:', tree);
     
     return tree.map(menu => {
@@ -139,7 +159,8 @@ export const useMenuStore = defineStore('menu', () => {
       console.log('生成的路由配置:', JSON.stringify(routes, null, 2));
       
       // 清除旧路由
-      router.getRoutes().forEach(route => {
+      const currentRoutes = router.getRoutes()
+      currentRoutes.forEach(route => {
         // 只清除非基础路由
         if (route.name && 
             !['Login', 'Home', 'UserProfile'].includes(route.name.toString()) && 
@@ -152,21 +173,8 @@ export const useMenuStore = defineStore('menu', () => {
         }
       })
       
-      // 添加新路由，过滤掉与静态路由冲突的路由
+      // 添加新路由
       routes.forEach(route => {
-        // 跳过与静态路由冲突的路由
-        if (route.path === '/home' || route.path === '/my-profile' || 
-            route.name === 'Home' || route.name === 'UserProfile') {
-          console.log('跳过静态路由:', route.name, route.path);
-          return;
-        }
-        
-        // 跳过根路径以避免冲突
-        if (route.path === '/') {
-          console.log('跳过根路径路由');
-          return;
-        }
-        
         console.log('添加路由:', route.name, route.path);
         router.addRoute(route as any)
       })
@@ -182,9 +190,11 @@ export const useMenuStore = defineStore('menu', () => {
   return {
     menus,
     loading,
+    hasMenus,
     menuTree,
     getMenus,
     generateRoutes,
-    addDynamicRoutes
+    addDynamicRoutes,
+    resetState
   }
 }) 
