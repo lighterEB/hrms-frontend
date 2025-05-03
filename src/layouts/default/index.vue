@@ -91,7 +91,7 @@ const toggleCollapse = () => {
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  background-color: #fff;
+  background-color: #18222c;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease-in-out;
   position: fixed;
