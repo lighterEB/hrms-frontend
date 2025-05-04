@@ -30,7 +30,9 @@ import {
   NThing,
   NText,
   NCheckbox,
-  NEmpty
+  NEmpty,
+  NSelect,
+  NDataTable
 } from 'naive-ui'
 
 import App from './App.vue'
@@ -69,7 +71,9 @@ const naive = create({
     NThing,
     NText,
     NCheckbox,
-    NEmpty
+    NEmpty,
+    NSelect,
+    NDataTable
   ]
 })
 
