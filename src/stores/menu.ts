@@ -46,39 +46,47 @@ export const useMenuStore = defineStore('menu', () => {
     
     console.log('构建菜单树，原始菜单数据:', menus);
     
+    // 检查是否已经是树形结构
+    const isAlreadyTree = menus.some(menu => menu.children && menu.children.length > 0);
+    if (isAlreadyTree) {
+      console.log('API已返回树形结构，无需再次构建');
+      return menus;
+    }
+    
     // 创建一个映射，用于快速查找菜单项
-    const menuMap = new Map<number, MenuVO>()
-    const result: MenuVO[] = []
+    // const menuMap = new Map<number, MenuVO>()
+    // const result: MenuVO[] = []
+    const result = [...menus];
     
-    // 第一步：建立映射关系
-    menus.forEach(menu => {
-      menuMap.set(menu.id, { ...menu, children: [] })
-    })
+    // // 第一步：建立映射关系
+    // menus.forEach(menu => {
+    //   menuMap.set(menu.id, { ...menu, children: [] })
+    // })
     
-    // 第二步：构建树形结构
-    menus.forEach(menu => {
-      const currentMenu = menuMap.get(menu.id)
-      if (currentMenu) {
-        // 判断是否为顶级菜单（父ID为null或0）
-        if (menu.parentId === null || menu.parentId === 0) {
-          // 一级菜单
-          result.push(currentMenu)
-        } else {
-          // 子菜单
-          const parentMenu = menuMap.get(menu.parentId)
-          if (parentMenu) {
-            if (!parentMenu.children) {
-              parentMenu.children = []
-            }
-            parentMenu.children.push(currentMenu)
-          } else {
-            // 如果找不到父菜单，作为顶级菜单处理
-            console.warn(`菜单ID ${menu.id} 的父菜单 ${menu.parentId} 不存在，作为顶级菜单处理`);
-            result.push(currentMenu)
-          }
-        }
-      }
-    })
+    // // 第二步：构建树形结构
+    // menus.forEach(menu => {
+    //   const currentMenu = menuMap.get(menu.id)
+    //   if (currentMenu) {
+    //     // 判断是否为顶级菜单（父ID为null或0）
+    //     if (menu.parentId === null || menu.parentId === 0) {
+    //       // 一级菜单
+    //       result.push(currentMenu)
+    //     } else {
+    //       // 子菜单
+    //       const parentMenu = menuMap.get(menu.parentId)
+    //       if (parentMenu) {
+    //         if (!parentMenu.children) {
+    //           parentMenu.children = []
+    //         }
+    //         parentMenu.children.push(currentMenu)
+    //       } else {
+    //         // 如果找不到父菜单，作为顶级菜单处理
+    //         console.warn(`菜单ID ${menu.id} 的父菜单 ${menu.parentId} 不存在，作为顶级菜单处理`);
+    //         result.push(currentMenu)
+    //       }
+    //     }
+    //   }
+    // })
     
     // 第三步：按照排序字段排序
     result.sort((a, b) => (a.sort || 0) - (b.sort || 0))
@@ -139,12 +147,16 @@ export const useMenuStore = defineStore('menu', () => {
     
     // 修正组件路径，去掉前面的斜杠
     const path = component.startsWith('/') ? component.substring(1) : component;
+    const parts = path.split('/');
+    const module = parts[0];
+    const submodule = parts[1];
+    const view = parts[2] || 'index';
     
     // 动态导入组件
     return () => {
       // 使用动态导入并添加错误处理
-      return import(`@/views/${path}.vue`).catch(err => {
-        console.error(`无法加载组件: @/views/${path}.vue`, err);
+      return import(`@/views/${module}/${submodule}/${view}.vue`).catch(err => {
+        console.error(`无法加载组件: @/views/${module}/${submodule}/${view}.vue`, err);
         // 导入失败时返回空白组件
         return import('@/views/empty.vue');
       });

@@ -2,7 +2,7 @@ import axios from 'axios'
 import type { AxiosInstance, AxiosResponse, AxiosError } from 'axios'
 import message from './message'
 import router from '@/router'
-import type { ApiResponse } from '@/types/auth'
+import type { ApiResponse } from '@/types/common'
 
 // 创建请求实例
 const request: AxiosInstance = axios.create({
@@ -125,6 +125,9 @@ const http = {
   },
   delete<T = any>(url: string, config?: any): Promise<T> {
     return request.delete(url, config)
+  },
+  patch<T = any>(url: string, data?: any, config?: any): Promise<T> {
+    return request.patch(url, data, config)
   }
 }
 

@@ -117,16 +117,23 @@ function transformMenu(menus: MenuVO[]): MenuOption[] {
 
 // 生成菜单选项，添加首页选项
 const menuOptions = computed(() => {
-  // 首页菜单选项
-  const homeOption: MenuOption = {
-    label: '首页',
-    key: '/home',
-    icon: renderIcon('HomeOutlined')
+  // 获取菜单树
+  const menuItems = transformMenu(menuStore.menuTree)
+  
+  // 检查是否已经包含了首页
+  const hasHome = menuItems.some(item => item.key === '/home')
+  
+  if (!hasHome) {
+    // 如果菜单中没有首页,添加首页选项
+    const homeOption: MenuOption = {
+      label: '首页',
+      key: '/home',
+      icon: renderIcon('HomeOutlined')
+    }
+    return [homeOption, ...menuItems]
   }
   
-  // 将首页选项添加到菜单树前面
-  const menuItems = transformMenu(menuStore.menuTree)
-  return [homeOption, ...menuItems]
+  return menuItems
 })
 
 // 菜单点击事件
