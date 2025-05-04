@@ -7,7 +7,7 @@ import type { UserVO, UserForm, UserQuery } from '@/types/user'
  * @param params 查询参数
  */
 export function getUserList(params: UserQuery & PageQuery): Promise<PageResult<UserVO>> {
-  return http.get('/v1/users', { params })
+  return http.get('/v1/users/page', { params })
 }
 
 /**
